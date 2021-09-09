@@ -81,7 +81,7 @@ https://pdfs.semanticscholar.org/d025/af40f1c74cb4ae9f39e45520160bdc45fa7a.pdf
 * The experiment tested this hypothesis by restoring light levels in the grassland understorey: if the idea is correct, this should prevent and reduce loss of species.
 
 ```{r Import Data}
-Fertilizer_counts <- read.delim("Fertilizer_counts.txt")
+Fertilizer_counts <- read.delim("data/fertilizer_counts.txt")
 View(Fertilizer_counts)
 ```
 
@@ -172,9 +172,20 @@ with integer count data.
 Fat Sheep Fitness (Soay Sheep): Sexual selection for increased body size relates to fitness.
 ![](images/sheep.jpeg)
 ```{r}
-sheepfitness <- read.csv("sheepfitness.csv")
+sheepfitness <- read.csv("data/sheepfitness.csv")
 sheep.glm <- glm(fitness ~ body.size, data = sheepfitness, family = poisson)
 ```
+
+```{r plot, message=FALSE, warning=FALSE, fig.width=4, fig.height=4}
+ggplot(sheepfitness, aes(body.size, fitness)) +
+  geom_point(size=3) +
+  #geom_smooth (method=lm, color="red") + #if you wanted to see the gaussian/identity fit
+  stat_smooth(method = glm, method.args = list(family = poisson(link = "log"))) +
+  labs(title="GLM, poisson distributed count data") +
+  xlab ("Body Size (kg)") +
+  ylab ("Fitness (Number of Lambs)")
+```
+
 As a reminder, what link function did the model use in specifying the GLM? What is the 'canonical' link for the Poisson family?
 ```{r}
 sheep.glm <- glm(fitness ~ body.size, data = sheepfitness, family = poisson(link = log))
