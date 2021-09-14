@@ -36,7 +36,8 @@ The Poisson distribution defines the variance as equal to the
 mean, but as always this assumption needs to be examined since count data
 won’t necessarily have this property in all cases.
 
-The Poisson distribution is defined as having a variance equal to its mean.
+Mathematical explanation of variance equal to its mean:  
+https://towardsdatascience.com/the-poisson-distribution-and-poisson-process-explained-4e2cb17d459
 
 If X ∼ Po(λ), then
 
@@ -59,7 +60,10 @@ data <- data.frame(cond = factor(rep(c("A","B","C","D"), each=1000)),
                               rpois(1000, 5.0), rpois(1000, 12.0)))
 
 #find the mean of each group
-means <- ddply(data, "cond", summarise, rating.mean=mean(rating))
+library(dplyr)
+means <- data %>%
+  group_by(cond) %>%
+  summarize(mean_rating = mean(rating, na.rm=TRUE))
 means
 
 # Plot histograms with mean lines, using means from above
@@ -67,21 +71,21 @@ ggplot(data, aes(x=rating)) + geom_histogram(binwidth=1, colour="black", fill="w
   facet_grid(cond ~ .) +
   scale_x_continuous(breaks=seq(0,30,5)) +
   ggtitle("Poisson Distributions With Differing Means") +
-  geom_vline(data=means, aes(xintercept=rating.mean), linetype="dashed", size=1, colour="red")
+  geom_vline(data=means, aes(xintercept=mean_rating), linetype="dashed", size=1, colour="red")
 ```
 Lets look at and example from the literature: Hautier, Niklaus, and Hector (2009; Science, 324: 636).
 https://pdfs.semanticscholar.org/d025/af40f1c74cb4ae9f39e45520160bdc45fa7a.pdf
 
-* Counts of the number of species in experimental grassland plots exposed to fertilization and addition of light to the grassland understorey.
+* Counts of the number of species in experimental grassland plots exposed to fertilization and addition of light to the grassland understory.
 
 * Fertilization usually increases productivity but leads to a loss of plant diversity.
 
 * One idea is that this is because enhanced growth leads to increasingly asymmetric competition for light (taller plants not only use the light themselves but can reduce its passage to their shorter competitors). 
 
-* The experiment tested this hypothesis by restoring light levels in the grassland understorey: if the idea is correct, this should prevent and reduce loss of species.
+* The experiment tested this hypothesis by restoring light levels in the grassland understory: if the idea is correct, this should prevent and reduce loss of species.
 
 ```{r Import Data}
-Fertilizer_counts <- read.delim("data/fertilizer_counts.txt")
+Fertilizer_counts <- read.csv("data/fertilizer_counts.csv")
 View(Fertilizer_counts)
 ```
 
