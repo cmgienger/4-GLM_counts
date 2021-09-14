@@ -213,7 +213,7 @@ it’s driven entirely by only two points on the very right.
 * The **normal Q–Q plot** (upper right panel) is also much better. It
 isn’t perfect, as there is some departure from the dashed line, but we
 shouldn’t expect a perfect plot. Life is never perfect. It is a lot better
-than the corresponding the plot from the lm() model, so it looks like
+than the corresponding the plot from the `lm()` model, so it looks like
 our distributional assumptions are OK.
 
 * The **scale–location plot** (bottom left panel) seems to show a slight
@@ -272,4 +272,9 @@ geom_smooth(method="glm", method.args=list(family="poisson"(link="log"))) +
 xlab("Body mass (kg)") + ylab("Lifetime fitness (No. of Lambs)") +
   ggtitle("Linear Model = Poisson Error Structure, Log Link")
 ```
-
+\
+\
+**Third Example to work together**
+Does the incidence of cancer (number of cases) increase with distance to a nuclear reactor?  
+What is the expected number of cancer occurrences at 10 km and at 100 km from the reactor?  
+data=clusters.csv
