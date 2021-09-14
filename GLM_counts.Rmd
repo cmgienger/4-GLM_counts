@@ -74,6 +74,8 @@ ggplot(data, aes(x=rating)) + geom_histogram(binwidth=1, colour="black", fill="w
   ggtitle("Poisson Distributions With Differing Means") +
   geom_vline(data=means, aes(xintercept=mean_rating), linetype="dashed", size=1, colour="red")
 ```
+\
+\
 Lets look at and example from the literature: Hautier, Niklaus, and Hector (2009; Science, 324: 636).
 https://www.zora.uzh.ch/id/eprint/18666/2/Hautier_2009.pdf
 
@@ -85,6 +87,8 @@ https://www.zora.uzh.ch/id/eprint/18666/2/Hautier_2009.pdf
 
 * The experiment tested this hypothesis by restoring light levels in the grassland understory: if the idea is correct, this should prevent and reduce loss of species.
 
+![](images/fert_light.jpeg)
+
 ```{r Import Data}
 Fertilizer_counts <- read.csv("data/fertilizer_counts.csv")
 View(Fertilizer_counts)
@@ -93,7 +97,7 @@ View(Fertilizer_counts)
 ```{r Boxplot of Plant Diversity in Experimental Plots}
 ggplot(Fertilizer_counts, aes(FL,Diversity)) +
   geom_boxplot() +
-  geom_point()
+  geom_jitter(height = 0, width = .15) #because count data overlap a lot when duplicate values
 ```
 ```{r Specify the Poisson GLM}
 pois1 <- glm(Diversity~Light*Fertilizer, family= poisson(link=log), data= Fertilizer_counts)
@@ -255,7 +259,6 @@ What is the expected limetime fitness for a 5 kg sheep? ANSWER=e^(-2.422+0.541*5
 ```{r Exponentiate the prediction}
 exp(-2.422+0.541*5)
 ```
-
 
 ```{r}
 ggplot(sheepfitness, aes(x = body.size, y = fitness)) +
