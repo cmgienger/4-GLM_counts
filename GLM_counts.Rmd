@@ -9,6 +9,7 @@ packages_needed <- c("ggplot2", # graphics
                      "plyr",
                      "arm", # display() etc.
                      "MASS",
+                     "dplyr",
                      "ggfortify"
                      )
 pk_to_install <- packages_needed [!( packages_needed %in% rownames(installed.packages())  )]
@@ -20,6 +21,7 @@ library(ggplot2)
 library(plyr)
 library(arm)
 library(MASS)
+library(dplyr)
 library(ggfortify)
 ```
 Count data resemble binomial count data in taking whole number values, but differ in that we only know how many times an event occurred, not the number of times it did not occur.
@@ -47,8 +49,8 @@ If X ∼ Po(λ), then
 
 σ^2 = λ
 
-If this assumption is met the ratio of residual deviance to residual DF (the
-dispersion) should be approximately 1:1.
+**If this assumption is met the ratio of residual deviance to residual DF (the
+dispersion) should be approximately 1:1.**
 
 What does a Poisson Distribution look like? It depends a lot on the mean.
 
@@ -60,7 +62,6 @@ data <- data.frame(cond = factor(rep(c("A","B","C","D"), each=1000)),
                               rpois(1000, 5.0), rpois(1000, 12.0)))
 
 #find the mean of each group
-library(dplyr)
 means <- data %>%
   group_by(cond) %>%
   summarize(mean_rating = mean(rating, na.rm=TRUE))
@@ -74,7 +75,7 @@ ggplot(data, aes(x=rating)) + geom_histogram(binwidth=1, colour="black", fill="w
   geom_vline(data=means, aes(xintercept=mean_rating), linetype="dashed", size=1, colour="red")
 ```
 Lets look at and example from the literature: Hautier, Niklaus, and Hector (2009; Science, 324: 636).
-https://pdfs.semanticscholar.org/d025/af40f1c74cb4ae9f39e45520160bdc45fa7a.pdf
+https://www.zora.uzh.ch/id/eprint/18666/2/Hautier_2009.pdf
 
 * Counts of the number of species in experimental grassland plots exposed to fertilization and addition of light to the grassland understory.
 
@@ -101,14 +102,18 @@ pois1 <- glm(Diversity~Light*Fertilizer, family= poisson(link=log), data= Fertil
 ```{r summary pois1}
 summary(pois1)
 ```
-Count data are often overdispersed where the residual deviance is more than expected, but in this case it is around a third less than expected (underdispersion).
+Count data are often overdispersed where the residual deviance is more than expected, but in this case it is much less than expected (underdispersion).
 
 Minor levels of underdispersion are often ignored, but here we could again use *quasi-maximum* likelihood to take it into account by estimating the observed level of variation and adjusting the standard errors accordingly. (note: notice how the standard errors are recalculated [but coefficients are not], but that also changes the calculated test statistic, z or t, [which is ratio of estimate to error] and the P-value)
+
 ```{r Quasi-poisson to fix the underdispersion}
 qpois1 <- glm(Diversity~Light*Fertilizer, quasipoisson, data= Fertilizer_counts)
 summary(qpois1)
+```
+```{r}
 coef(qpois1)
 ```
+
 ```{r}
 confint(qpois1)
 ```
@@ -116,13 +121,13 @@ Interpretation (remember that coefficients are still on the log scale):
 
 As usual we start at the bottom of the table with the interaction. The
 interaction is significant so we have our main result; the significance of the
-other rows is of limited interest (they give thexp(e average effects and the interaction
+other rows is of limited interest (they give the average effects and the interaction
 tells us that average effects can be misleading because the effects of
 the factors depend on each other).
 
 On average, fertilizer leads to a loss of species but when light is added to the understorey this effect is cancelled out (adding light has a positive effect here, although this effect was not significant in the original analysis of changes in species richness which had the advantage of controlling for initial variation in diversity between plots which our analysis here does not do). 
 
-The interaction.plot() function provides a quick option for examining interactions:
+The `interaction.plot()` function provides a quick option for examining interactions:
 ```{r Interaction Plot}
 attach(Fertilizer_counts)
 interaction.plot(Fertilizer, Light, Diversity)
@@ -136,7 +141,7 @@ overdispersion into account).
 
 It is possible that the Poisson distribution may be close to normally distributed here so we could try a Gaussian GLM (although it could predict negative counts which are impossible with the Poisson model). 
 
-The boxcox() function can guide us on transformations:
+The `boxcox()` function can guide us on transformations:
 
 ```{r boxcox transform}
 boxcox(glm(Diversity~Light*Fertilizer, data = Fertilizer_counts))
@@ -193,29 +198,29 @@ ggplot(sheepfitness, aes(body.size, fitness)) +
 As a reminder, what link function did the model use in specifying the GLM? What is the 'canonical' link for the Poisson family?
 ```{r}
 sheep.glm <- glm(fitness ~ body.size, data = sheepfitness, family = poisson(link = log))
-#this is the same model as above, but all defaults are reported rather than assumed
+#this is the same model as above, but all defaults are explicitly reported rather than assumed
 ```
 Lets look at the diagnostic plots.
 ```{r diagnose sheep glm model, fig.width=6, fig.height=6}
 autoplot(sheep.glm)
 ```
-* The plot of residuals vs fitted values (upper left panel) suggests that
+* The **plot of residuals vs fitted values** (upper left panel) suggests that
 the systematic part of the model is now pretty good. There is no clear
 pattern in the relationship, apart from the very slight upward trend at
 the end. This is nowhere close to being large enough to worry about—
 it’s driven entirely by only two points on the very right.
 
-* The normal Q–Q plot (upper right panel) is also much better. It
+* The **normal Q–Q plot** (upper right panel) is also much better. It
 isn’t perfect, as there is some departure from the dashed line, but we
 shouldn’t expect a perfect plot. Life is never perfect. It is a lot better
 than the corresponding the plot from the lm() model, so it looks like
 our distributional assumptions are OK.
 
-* The scale–location plot (bottom left panel) seems to show a slight
+* The **scale–location plot** (bottom left panel) seems to show a slight
 positive relationship between the size of the residuals and the fitted
 values. If you just focus on the points, there isn’t much going on.
 
-* The residuals–leverage plot (bottom right panel) is also fine. There is
+* The **residuals–leverage plot** (bottom right panel) is also fine. There is
 no evidence that we have to worry about outliers or points having too
 much of an effect on the model.
 \
