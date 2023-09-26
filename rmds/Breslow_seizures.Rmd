@@ -1,0 +1,106 @@
+---
+title: "Breslow Seizure Data"
+output: html_document
+---
+
+This is an example form Kabacoff (2015) R in Action (Section 13.3, page 312.)
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. 
+
+```{r setup}
+#install.packages("robust")
+library(robust)
+library(ggplot2)
+library(patchwork)
+```
+To illustrate the fitting of a Poisson regression model, along with some issues
+that can come up in the analysis, we’ll use the Breslow seizure data (Breslow, 1993)
+provided in the `robust` package. Specifically, we’ll consider the impact of an
+antiepileptic drug treatment on the number of seizures occurring over an eight-week
+period following the initiation of therapy. Be sure to install the `robust` package
+before continuing.  
+
+Data were collected on the age and number of seizures reported by patients suffering
+from simple or complex partial seizures during an eight-week period before, and eightweek
+period after, randomization into a drug or placebo condition. **sumY** (the number
+of seizures in the eight-week period post-randomization) is the response variable.
+Treatment condition (**Trt**), age in years (**Age**), and number of seizures reported in the
+baseline eight-week period (**Base**) are the predictor variables. The baseline number
+of seizures and age are included because of their potential effect on the response
+variable. We are interested in whether or not evidence exists that the drug treatment
+decreases the number of seizures after accounting for these covariates.  
+
+First, let’s look at summary statistics for the dataset:  
+
+```{r look at data}
+data(breslow.dat, package="robust")
+names(breslow.dat)
+```
+
+```{r data summary}
+summary(breslow.dat[c(6,7,8,10)])
+```
+
+Note that although there are 12 variables in the dataset, we’re limiting our attention
+to the four described earlier. Both the baseline and post-randomization number of seizures
+is highly skewed. Let’s look at the response variable in more detail.  
+
+```{r initial plots}
+p1 <- ggplot(data=breslow.dat, aes(sumY)) + 
+  geom_histogram(binwidth = 20) +
+  xlab("Seizure Count") +
+  ylab("Frequency")
+
+p2 <- ggplot(data=breslow.dat, aes(Trt, sumY)) +
+  geom_boxplot() +
+  xlab("Treatment") +
+  ylab("")
+
+p1 + p2
+```
+
+You can clearly see the skewed nature of the dependent variable and the possible presence of outliers. At first glance, the number of seizures in the drug condition appears to be smaller and have a smaller variance. (You’d expect a smaller variance to accompany a smaller mean with Poisson distributed data.) Unlike standard OLS regression, this heterogeneity of variance isn’t a problem in Poisson regression.  
+
+The next step is to fit the Poisson regression:  
+
+```{r fit GLM}
+fit <- glm(sumY ~ Base + Age + Trt, data=breslow.dat, family=poisson())
+summary(fit)
+```
+
+The output provides the deviances, regression parameters, standard errors, and tests
+that these parameters are 0. Note that each of the predictor variables is significant at
+the p<0.05 level.  
+
+The model coefficients are obtained using the coef() function, or by examining the
+Coefficients table in the `summary()` function output:  
+
+```{r examine coefficients}
+coef(fit)
+```
+
+In a Poisson regression, the dependent variable being modeled is the log of the conditional mean log e
+(λ) . The regression parameter 0.0227 for Age indicates that a one year increase in age is associated with a 0.03 increase in the log mean number of seizures, holding baseline seizures and treatment condition constant. The intercept is the log mean number of seizures when each of the predictors equals 0. Because you can’t have a zero age and none of the participants had a zero number of baseline seizures, the intercept isn’t meaningful in this case.  
+
+It’s usually much easier to interpret the regression coefficients in the original scale
+of the dependent variable (number of seizures, rather than log number of seizures).
+To accomplish this, exponentiate the coefficients:  
+
+```{r exponentiate coefficients}
+ exp(coef(fit))
+```
+
+Now you see that a one-year increase in age multiplies the expected number of seizures by 1.023, holding the other variables constant. This means that increased age is associated with higher numbers of seizures. More importantly, a one-unit change
+in Trt (that is, moving from placebo to progabide) multiplies the expected number of seizures by 0.86. You’d expect a 20 percent decrease in the number of seizures for the drug group compared with the placebo group, holding baseline number of seizures and age constant.  
+
+It’s important to remember that, like the exponeniated parameters in logistic regression, the exponeniated parameters in the Poisson model have a multiplicative rather than an additive effect on the response variable. Also, as with logistic regression, you must evaluate your model for overdispersion.
+
+
+
+INSERT CODE FROM PREVIOUS LECTURES FOR OVERDISPERSION TO FINISH THIS EXAMPLE.
+
+
+
+
+
+http://www.cs.uni.edu/~jacobson/4772/week11/R_in_Action.pdf
