@@ -142,11 +142,13 @@ ggplot(data=clusters, aes(cancers)) +
 model_cancer_poisson <- glm(cancers ~ distance, family = poisson, data=clusters)
 summary(model_cancer_poisson)
 ```
-The trend does not look to be significant, but **look at the residual deviance**. It is assumed that this is the same as the residual degrees of freedom. The fact that residual deviance is larger than residual df indicates that we likely have overdispersion. We can compensate for the overdispersion by refining the model using quasi-Poisson rather than Poisson errors.
+The trend does not look to be significant, but **look at the residual deviance**. It is assumed that this is the same as the residual degrees of freedom. The fact that residual deviance is larger than residual df indicates that we likely have overdispersion.
 
 ```{r check the poisson model}
 autoplot(model_cancer_poisson)
 ```
+
+We can compensate for the overdispersion by refining the model using quasi-Poisson rather than Poisson errors.
 
 ```{r quasi-Poisson model}
 model_cancer_quasi <- glm(cancers~distance, family = quasipoisson, data = clusters)
@@ -157,7 +159,8 @@ Compensating for the overdispersion (using quasipoisson) increased to P-value fr
 ```{r check the quasi-poisson model}
 autoplot(model_cancer_quasi)
 ```
-Looks the same as the Poisson model; not much else we can do.
+\
+Quasipoisson fit looks the same as the Poisson model; not much else we can do.
 \
 \
 \
@@ -202,16 +205,15 @@ pois1 <- glm(Diversity~Light*Fertilizer, family= poisson(link=log), data= Fertil
 summary(pois1)
 ```
 
-```{r plot model parameters, fig.height=2.5}
+```{r plot pois1 model parameters, fig.height=2.5}
 #easystats package
 plot(parameters(pois1)) +
   ggplot2::labs(title = "Plot model coefficients to visualize\n (some C.I.s overlap zero)")
 ```
 
-
 Count data are often overdispersed where the residual deviance is more
 than expected, but in this case it is much less than expected
-(underdispersion).
+(underdispersion: Residual deviance: 6.6221 on 28 degrees of freedom).
 
 Minor levels of underdispersion are often ignored, but here we could
 again use *quasi-maximum* likelihood to take it into account by
@@ -233,7 +235,13 @@ coef(qpois1)
 ```{r confit of qposi1}
 confint(qpois1)
 ```
-
+```{r plot qpois1 model parameters, fig.height=2.5}
+#easystats package
+plot(parameters(qpois1)) +
+  ggplot2::labs(title = "Plot model coefficients to visualize quasipoisson")
+```
+\
+\
 Interpretation (remember that coefficients are still on the log scale):
 
 As usual we start at the bottom of the table with the interaction. The
@@ -274,9 +282,8 @@ The `boxcox()` function can guide us on transformations:
 boxcox(glm(Diversity~Light*Fertilizer, data = Fertilizer_counts))
 ```
 
-The CI is quite wide and includes no action (λ = 1) but the 'best'
-transformation (although remember that the sole criterion is linearizing
-the relationship) is the log (λ = 0):
+The CI is quite wide and includes no action (λ = 1), but the 'best'
+transformation is the log (λ = 0):
 
 ```{r log normal model}
 log.norm <- glm(Diversity~Light*Fertilizer, gaussian (link=log), data= Fertilizer_counts)
@@ -293,7 +300,8 @@ result.
 summary(log.norm)
 coef(log.norm)
 ```
-
+\
+\
 **Another Example: Soay Sheep**
 
 Fat Sheep Fitness (Soay Sheep): Sexual selection for increased body size
@@ -435,7 +443,7 @@ xlab("Body mass (kg)") + ylab("Lifetime fitness (No. of Lambs)") +
     necessarily be a good model. The Poisson distribution generally
     applies well to data with many low values, including zeros.
 
--   In this example there was less variation than expected due to an
+-   In this example (fertilizer) there was less variation than expected due to an
     absence of these low values and we found *underdispersion*. When
     there are few low values and zeros, and the mean count rises, the
     Poisson distribution becomes similar to the normal distribution, as
