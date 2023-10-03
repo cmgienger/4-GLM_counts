@@ -144,8 +144,8 @@ summary(model_cancer_poisson)
 ```
 The trend does not look to be significant, but **look at the residual deviance**. It is assumed that this is the same as the residual degrees of freedom. The fact that residual deviance is larger than residual df indicates that we likely have overdispersion.
 
-```{r check the poisson model}
-autoplot(model_cancer_poisson)
+```{r check the poisson model, fig.width=8, fig.height=6, message=FALSE, warning=FALSE}
+check_model(model_cancer_poisson)
 ```
 
 We can compensate for the overdispersion by refining the model using quasi-Poisson rather than Poisson errors.
@@ -156,8 +156,8 @@ summary(model_cancer_quasi)
 ```
 Compensating for the overdispersion (using quasipoisson) increased to P-value from 0.094 to 0.183, so there is no compelling evidence to support the idea that cancer incidence is related to distance from the reactor. Therefore it doesn't make much sense to try to interpret the distance slope coefficient.
 
-```{r check the quasi-poisson model}
-autoplot(model_cancer_quasi)
+```{r check the quasi-poisson model, fig.height=6, fig.width=8, message=FALSE, warning=FALSE}
+check_model(model_cancer_quasi)
 ```
 \
 Quasipoisson fit looks the same as the Poisson model; not much else we can do.
@@ -195,6 +195,12 @@ Fertilizer_counts <- read.csv("../data/fertilizer_counts.csv")
 ggplot(Fertilizer_counts, aes(FL,Diversity)) +
   geom_boxplot() +
   geom_jitter(shape=1, size=3, height = 0, width = .15) #because count data overlap a lot when duplicate values are present
+```
+
+```{r histogram of diversity, message=FALSE, warning=FALSE}
+ggplot(data=Fertilizer_counts, aes(Diversity)) + 
+  geom_histogram() +
+  labs(title = "No zeros: Makes sense, zero would mean no grassland species present. \nLooks almost more like a normal dist. than poisson")
 ```
 
 ```{r Specify the Poisson GLM}
@@ -332,8 +338,8 @@ sheep.glm <- glm(fitness ~ body.size, data = sheepfitness, family = poisson(link
 
 Lets look at the diagnostic plots.
 
-```{r diagnose sheep glm model, fig.width=6, fig.height=6}
-autoplot(sheep.glm)
+```{r diagnose sheep glm model, fig.height=6, fig.width=8, message=FALSE, warning=FALSE}
+check_model(sheep.glm)
 ```
 
 -   The **plot of residuals vs fitted values** (upper left panel)
@@ -410,7 +416,7 @@ ANSWER=e\^(-2.422+0.541\*5), or 1.33 lambs.
 exp(-2.422+0.541*5)
 ```
 
-```{r compare poisson vs gaussian plots of sheep fitness}
+```{r compare poisson vs gaussian plots of sheep fitness, message=FALSE, warning=FALSE}
 ggplot(sheepfitness, aes(x = body.size, y = fitness)) +
 geom_point() +
 geom_smooth(method = "glm", method.args=list(family="gaussian"(link="identity")))+
