@@ -315,31 +315,37 @@ relates to fitness. ![](../images/sheep.jpeg)
 
 ```{r import sheep fitness data}
 sheepfitness <- read.csv("../data/sheepfitness.csv")
-sheep.glm <- glm(fitness ~ body.size, data = sheepfitness, family = poisson)
+sheep.poisson <- glm(fitness ~ body.size, data = sheepfitness, family = poisson)
 ```
 
-```{r plot sheep fitness against body size, message=FALSE, warning=FALSE, fig.width=4, fig.height=4}
-ggplot(sheepfitness, aes(body.size, fitness)) +
-  geom_point(size=3) +
-  geom_smooth (method=lm, color="red") + #if you wanted to see the gaussian/identity fit
-  stat_smooth(method = glm, method.args = list(family = poisson(link = "log"))) +
-  labs(title="GLM, poisson distributed count data") +
-  xlab ("Body Size (kg)") +
-  ylab ("Fitness (Number of Lambs)")
+```{r compare poisson vs gaussian plots of sheep fitness, message=FALSE, warning=FALSE}
+ggplot(sheepfitness, aes(x = body.size, y = fitness)) +
+geom_point() +
+geom_smooth(method = "glm", method.args=list(family="gaussian"(link="identity")))+
+#geom_smooth(span = 1, colour = "red", se = FALSE) +
+xlab("Body mass (kg)") + ylab("Lifetime fitness (No. of Lambs)") +
+  ggtitle("Linear Model = Gaussian Error Structure, Identity Link")
+#note negative prediction of fitness below ~3kg.
+
+ggplot(sheepfitness, aes(x = body.size, y = fitness)) +
+geom_point() +
+geom_smooth(method="glm", method.args=list(family="poisson"(link="log"))) +
+xlab("Body mass (kg)") + ylab("Lifetime fitness (No. of Lambs)") +
+  ggtitle("Linear Model = Poisson Error Structure, Log Link")
 ```
 
 As a reminder, what link function did the model use in specifying the
 GLM? What is the 'canonical' link for the Poisson family?
 
-```{r sheep.glm model}
-sheep.glm <- glm(fitness ~ body.size, data = sheepfitness, family = poisson(link = log))
+```{r sheep.poisson model}
+sheep.poisson <- glm(fitness ~ body.size, data = sheepfitness, family = poisson(link = log))
 #this is the same model as above, but all defaults are explicitly reported rather than assumed
 ```
 
 Lets look at the diagnostic plots.
 
 ```{r diagnose sheep glm model, fig.height=6, fig.width=8, message=FALSE, warning=FALSE}
-check_model(sheep.glm)
+check_model(sheep.poisson)
 ```
 
 -   The **plot of residuals vs fitted values** (upper left panel)
@@ -382,15 +388,15 @@ whether the mean--variance relationship is OK (it will only be
 patternless if the Poisson distribution is the right model).
 
 ```{r Look at the model}
-anova(sheep.glm)
+anova(sheep.poisson)
 ```
 
 Because the model is fit with maximum likelihood, we get deviance table.
 Deviance explained by body size is 37.0 units, unaccounted deviance is
 48.0 and the total deviance (body size + unaccounted) is 85.0.
 
-```{r summary of sheep.glm}
-summary(sheep.glm)
+```{r summary of sheep.poisson}
+summary(sheep.poisson)
 ```
 
 What does the report tell us?
@@ -416,22 +422,25 @@ ANSWER=e\^(-2.422+0.541\*5), or 1.33 lambs.
 exp(-2.422+0.541*5)
 ```
 
-```{r compare poisson vs gaussian plots of sheep fitness, message=FALSE, warning=FALSE}
-ggplot(sheepfitness, aes(x = body.size, y = fitness)) +
-geom_point() +
-geom_smooth(method = "glm", method.args=list(family="gaussian"(link="identity")))+
-#geom_smooth(span = 1, colour = "red", se = FALSE) +
-xlab("Body mass (kg)") + ylab("Lifetime fitness (No. of Lambs)") +
-  ggtitle("Linear Model = Gaussian Error Structure, Identity Link")
-#note negative prediction of fitness below ~3kg.
-
-ggplot(sheepfitness, aes(x = body.size, y = fitness)) +
-geom_point() +
-geom_smooth(method="glm", method.args=list(family="poisson"(link="log"))) +
-xlab("Body mass (kg)") + ylab("Lifetime fitness (No. of Lambs)") +
-  ggtitle("Linear Model = Poisson Error Structure, Log Link")
+```{r plot sheep fitness against body size, message=FALSE, warning=FALSE, fig.width=5, fig.height=5, fig.align = 'center'}
+ggplot(sheepfitness, aes(body.size, fitness)) +
+  geom_point(size=3) +
+  geom_smooth (method=lm, color="red") + #if you wanted to see the gaussian/identity fit
+  stat_smooth(method = glm, method.args = list(family = poisson(link = "log"))) +
+  labs(title="GLM, poisson distributed count data") +
+  xlab ("Body Size (kg)") +
+  ylab ("Fitness (Number of Lambs)")
 ```
 
+Is there a formal way to directly compare poisson and gaussian models? Some people (purists) say no, but I think there is a hack you can use to compare model fits. But remember, poisson was definitely the better model because it avoids prediction of values below zero and 'bends' to fit data.
+
+```{r model comparison}
+#first fit gaussian GLM
+sheep.gaussian <- glm(fitness ~ body.size, data = sheepfitness, family = gaussian)
+#compare poisson vs gaussian models.
+compare_performance(sheep.poisson, sheep.gaussian, metrics = "common", verbose = FALSE)
+```
+Clearly the Poisson model is better on both a prediction and 'fit' basis than the Gaussian model (Lower AICc score). We will talk about different criteria for comparing models in the chapter covering model selection.
 \
 \
 **Summary of GLM Counts**
