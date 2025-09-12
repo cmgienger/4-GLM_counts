@@ -31,6 +31,11 @@ library(ggfortify)
 library(easystats)
 ```
 
+Good background video:
+
+https://www.youtube.com/watch?v=i62gffPrZYA
+
+
 Count data resemble binomial count data in taking whole number values,
 but differ in that we only know how many times an event occurred, not
 the number of times it did not occur.
@@ -156,7 +161,7 @@ summary(model_cancer_quasi)
 ```
 Compensating for the overdispersion (using quasipoisson) increased to P-value from 0.094 to 0.183, so there is no compelling evidence to support the idea that cancer incidence is related to distance from the reactor. Therefore it doesn't make much sense to try to interpret the distance slope coefficient.
 
-```{r check the quasi-poisson model, fig.height=6, fig.width=8, message=FALSE, warning=FALSE}
+```{r check the quasi-poisson model, fig.width=11, message=FALSE, warning=FALSE}
 check_model(model_cancer_quasi)
 ```
 \
@@ -235,7 +240,7 @@ summary(qpois1)
 ```
 
 ```{r coef of qposi1}
-coef(qpois1)
+kableExtra::kable(round(coef(qpois1), 3), caption = "Poisson Regression Coefficients")
 ```
 
 ```{r confit of qposi1}
@@ -402,8 +407,8 @@ summary(sheep.poisson)
 What does the report tell us?
 
 -   coefficient tests: **Wald z-value** to tell us whether the estimate
-    is significantly different from zero. Ratio of the estimate/SE (for
-    body size 0.540/0.093 = 5.80).
+    is significantly different from zero. Ratio of the estimate/SE for
+    body size is 0.540/0.093 = 5.80.
 
 -   The model looks fine for over dispersion (48.0/48.0=1).
 
@@ -415,7 +420,39 @@ What does the report tell us?
     success. If we want to know how many lambs a 5 kg ewe is predicted
     to produce, we must account for what the link function did.
 
-What is the expected limetime fitness for a 5 kg sheep?
+\
+
+We can use our coefficients to interpret the slope and make predictions from our Poisson GLM.
+
+**Slope (\(\beta_1\))** The slope represents the change in the **log of expected counts** for a one-unit increase in \(X\).
+
+On the response scale, you **exponentiate the slope**:
+
+$$
+e^{\beta_1}
+$$
+
+This gives the **multiplicative effect** of a one-unit increase in \(X\) on the expected count.
+
+For example, if \(\beta_1 = 0.25\):
+
+$$
+e^{0.25} = 1.28
+$$
+
+This means each 1-unit increase in \(X\) increases the expected count by 28%.
+
+\
+
+*For our sheep,* if \(\beta_1 = 0.54\):
+
+$$
+e^{0.54} = 1.72
+$$
+
+This means each 1-unit increase in 𝑋 increases the expected count by 72%.
+
+<p style="color: blue;"> What is the expected limetime fitness for a 5 kg sheep? </p>
 ANSWER=e\^(-2.422+0.541\*5), or 1.33 lambs.
 
 ```{r Exponentiate the prediction}
@@ -427,14 +464,14 @@ ggplot(sheepfitness, aes(body.size, fitness)) +
   geom_point(size=3) +
   geom_smooth (method=lm, color="red") + #if you wanted to see the gaussian/identity fit
   stat_smooth(method = glm, method.args = list(family = poisson(link = "log"))) +
-  labs(title="GLM, poisson distributed count data") +
+  labs(title="GLM: Count data") +
   xlab ("Body Size (kg)") +
   ylab ("Fitness (Number of Lambs)")
 ```
 
 Is there a formal way to directly compare poisson and gaussian models? Some people (purists) say no, but I think there is a hack you can use to compare model fits. But remember, poisson was definitely the better model because it avoids prediction of values below zero and 'bends' to fit data.
 
-```{r model comparison}
+```{r model comparison, message=FALSE, warning=FALSE}
 #first fit gaussian GLM
 sheep.gaussian <- glm(fitness ~ body.size, data = sheepfitness, family = gaussian)
 #compare poisson vs gaussian models.
@@ -458,8 +495,10 @@ Clearly the Poisson model is better on both a prediction and 'fit' basis than th
     necessarily be a good model. The Poisson distribution generally
     applies well to data with many low values, including zeros.
 
--   In this example (fertilizer) there was less variation than expected due to an
-    absence of these low values and we found *underdispersion*. When
+-   In the fertilizer example there was less variation than expected due to an
+    absence of low values and we found *underdispersion*. When
     there are few low values and zeros, and the mean count rises, the
     Poisson distribution becomes similar to the normal distribution, as
     we observed for this example.
+    
+-   The slope in a poisson model is the change in the **log of expected counts for a one-unit increase in 𝑋**. To make sense of the slope coefficient we must exponentiate it. (exponentiation is the inverse of log; our back transform) We can use exponentiation to make predictions based on the model coefficients in the usual GLM way.
