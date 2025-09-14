@@ -95,7 +95,8 @@ means <- data %>%
 means
 
 # Plot histograms with mean lines, using means from above
-ggplot(data, aes(x=rating)) + geom_histogram(binwidth=1, colour="black", fill="white") + 
+ggplot(data, aes(x=rating)) + 
+  geom_histogram(binwidth=1, colour="black", fill="white") + 
   facet_grid(cond ~ .) +
   scale_x_continuous(breaks=seq(0,30,5)) +
   ggtitle("Poisson Distributions With Differing Means") +
@@ -138,7 +139,8 @@ ggplot(clusters, aes(distance, cancers)) +
 
 ```{r histogram of cancer clusters, message=FALSE, warning=FALSE}
 ggplot(data=clusters, aes(cancers)) + 
-  geom_histogram() +
+  geom_histogram(binwidth=1, colour="black", fill="white") +
+  scale_x_continuous(breaks=seq(0,6,1)) +
   labs(title = "Look at all those zeros!")
 ```
 
