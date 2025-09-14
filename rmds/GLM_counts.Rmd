@@ -149,7 +149,7 @@ ggplot(data=clusters, aes(cancers)) +
 model_cancer_poisson <- glm(cancers ~ distance, family = poisson, data=clusters)
 summary(model_cancer_poisson)
 ```
-The trend does not look to be significant, but **look at the residual deviance**. It is assumed that this is the same as the residual degrees of freedom. The fact that residual deviance is larger than residual df indicates that we likely have overdispersion.
+The trend does not look to be significant, but **look at the residual deviance**. It is assumed that this is the same as the residual degrees of freedom. The fact that residual deviance is larger than residual df indicates that we likely have overdispersion (data are more spread out than the model expects based on the poisson distribution).
 
 ```{r check the poisson model, fig.width=8, fig.height=6, message=FALSE, warning=FALSE}
 check_model(model_cancer_poisson)
