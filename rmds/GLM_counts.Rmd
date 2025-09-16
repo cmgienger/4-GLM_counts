@@ -155,7 +155,8 @@ The trend does not look to be significant, but **look at the residual deviance**
 check_model(model_cancer_poisson)
 ```
 
-We can compensate for the overdispersion by refining the model using quasi-Poisson rather than Poisson errors.
+We can compensate for the overdispersion by refining the model using quasi-Poisson rather than Poisson errors. 
+Quasi-Poisson is specifically designed to handle overdispersion, which is common in count data.
 
 ```{r quasi-Poisson model}
 model_cancer_quasi <- glm(cancers~distance, family = quasipoisson, data = clusters)
