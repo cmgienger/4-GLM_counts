@@ -259,7 +259,7 @@ plot(parameters(qpois1)) +
 Interpretation (remember that coefficients are still on the log scale):
 
 As usual we start at the bottom of the table with the interaction. The
-interaction is significant so we have our main result; the significance
+**interaction is significant so we have our main result**; the significance
 of the other rows is of limited interest (they give the average effects
 and the interaction tells us that average effects can be misleading
 because the effects of the factors depend on each other).
