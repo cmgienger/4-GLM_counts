@@ -355,25 +355,25 @@ Lets look at the diagnostic plots.
 check_model(sheep.poisson)
 ```
 
--   The **plot of residuals vs fitted values** (upper left panel)
+-   The **plot of residuals vs fitted values** (top right panel)
     suggests that the systematic part of the model is now pretty good.
     There is no clear pattern in the relationship, apart from the very
     slight upward trend at the end. This is nowhere close to being large
     enough to worry about--- it's driven entirely by only two points on
     the very right.
 
--   The **normal Q--Q plot** (upper right panel) is also much better. It
-    isn't perfect, as there is some departure from the dashed line, but
+-   The **normal Q--Q plot** (lower left panel) is also much better. It
+    isn't perfect, as there is some departure from the predicted fit line, but
     we shouldn't expect a perfect plot. Life is never perfect. It is a
     lot better than the corresponding the plot from the `lm()` model, so
     it looks like our distributional assumptions are OK.
 
--   The **scale--location plot** (bottom left panel) seems to show a
+-   The **scale--location plot** (middle left panel) seems to show a
     slight positive relationship between the size of the residuals and
     the fitted values. If you just focus on the points, there isn't much
     going on.
 
--   The **residuals--leverage plot** (bottom right panel) is also fine.
+-   The **residuals--leverage plot** (lower right panel) is also fine.
     There is no evidence that we have to worry about outliers or points
     having too much of an effect on the model.\
     \
